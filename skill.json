@@ -1,0 +1,76 @@
+{
+  "name": "script-memory",
+  "version": "1.0.0",
+  "description": "Turn a theatre script, dialogue, or speech draft in any common file format into a single-file offline memorisation trainer, and normalise the script document first without altering one word of dialogue.",
+  "author": "yzh5310",
+  "license": "MIT",
+  "homepage": "https://github.com/yzh5310/script-memory-skill",
+  "targetAudience": {
+    "direct": "AI agents that normalise a script and generate a rehearsal tool",
+    "ultimate": "Performers, students and presenters memorising lines, a monologue or a speech"
+  },
+  "productPromise": "Produce a normalised script whose dialogue is provably unchanged, plus one offline page that enforces a fixed memorisation order: skeleton, anchors, reusable parts, physical cue sheet.",
+  "outputs": {
+    "document": "Normalised script document (docx or markdown) with unified scaffolding",
+    "application": "Single self-contained offline HTML rehearsal page"
+  },
+  "nonGoals": [
+    "translation",
+    "script rewriting or ghostwriting",
+    "performance scoring or judgement",
+    "fixing typos inside dialogue",
+    "generating fake personal anecdotes"
+  ],
+  "inputFormats": [
+    "docx", "doc", "pptx", "xlsx", "csv", "tsv", "txt", "md",
+    "html", "json", "pdf", "rtf", "srt", "vtt"
+  ],
+  "cueCodes": {
+    "B": "beat / skeleton heading",
+    "S": "setting",
+    "A": "action / blocking",
+    "T": "delivery tip",
+    "L": "spoken line (must stay byte-identical to the source)"
+  },
+  "memorySequence": [
+    "skeleton (6-10 pictures, no words)",
+    "anchors (leading 2-3 words per line)",
+    "reusable parts (repeated sentence patterns)",
+    "physical cue sheet (leading 3 words per line)",
+    "listen-along loop",
+    "rescue lines for going dry"
+  ],
+  "verificationGates": {
+    "structure": "python scripts/validate_data.py <data.json> [--html <index.html>]",
+    "fidelity": "python scripts/check_fidelity.py --source <original> --data <data.json>",
+    "boot": "node scripts/smoke_boot.js <index.html> [<previous-build.html>]",
+    "releaseGate": "check_fidelity.py must exit 0 before delivery"
+  },
+  "schemas": {
+    "scriptData": "schemas/script-data.schema.json"
+  },
+  "references": [
+    "references/extraction.md",
+    "references/normalization.md",
+    "references/memory-methods.md"
+  ],
+  "assets": {
+    "template": "template.html"
+  },
+  "examples": [
+    "examples/mini-dialogue.data.json",
+    "examples/mini-monologue.data.json"
+  ],
+  "dependencies": {
+    "required": "Python 3.8+ standard library only",
+    "optional": {
+      "pdf": "pypdf / PyPDF2 / pdftotext",
+      "smokeTest": "Node.js"
+    }
+  },
+  "privacy": {
+    "networkAccess": false,
+    "telemetry": false,
+    "localState": "localStorage key derived from the title (CFG.stateKey)"
+  }
+}

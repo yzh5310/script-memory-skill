@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>台词记忆训练器</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23D4A843'/%3E%3Ctext x='50' y='70' font-size='54' text-anchor='middle' fill='%231b1b27'%3E记%3C/text%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:#14141d; --panel:#1f1f2e; --panel2:#282840; --line:#373757;
+    --text:#ececf6; --muted:#9aa0b8; --accent:#D4A843; --accent2:#7aa2f7;
+    --me:#5fb37a; --partner:#e0894b; --danger:#e05a5a; --cueA:#7aa2f7; --cueT:#c792ea;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:"Segoe UI",system-ui,"Microsoft YaHei",sans-serif;line-height:1.55;-webkit-text-size-adjust:100%}
+  header{padding:18px 20px 16px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#221f34,#14141d)}
+  header h1{margin:0;font-size:19px;letter-spacing:.4px}
+  header h1 .en{color:var(--accent)}
+  header p{margin:5px 0 0;color:var(--muted);font-size:13px}
+  .wrap{max-width:1060px;margin:0 auto;padding:16px 16px 72px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:16px}
+  .card h2{margin:0 0 12px;font-size:15px;color:var(--accent);font-weight:600}
+  .help-card{border-color:var(--accent);background:linear-gradient(180deg,rgba(212,168,67,.10),rgba(212,168,67,.03))}
+  .help-card summary{cursor:pointer;font-size:14px;font-weight:600;color:var(--accent);padding:2px 0;list-style:none}
+  .help-card summary::-webkit-details-marker{display:none}
+  .help-card summary:before{content:"▸ ";display:inline-block;transition:.2s}
+  .help-card[open] summary:before{transform:rotate(90deg)}
+  .help-card[open] summary{margin-bottom:10px}
+  .help-body{display:flex;flex-direction:column;gap:9px}
+  .help-step{font-size:13px;line-height:1.7;color:var(--text)}
+  .help-step b{color:var(--accent)}
+  .help-sub{margin-top:6px;padding-left:2px;border-left:2px solid var(--line);padding-left:10px;font-size:12.5px;color:var(--muted);line-height:1.7}
+  .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  button{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer;transition:.15s;font-family:inherit}
+  button:hover{border-color:var(--accent)}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  button.primary{background:var(--accent);color:#1b1b27;border-color:var(--accent);font-weight:600}
+  button.primary:hover{filter:brightness(1.08)}
+  button.big{padding:11px 20px;font-size:15px}
+  button.sm{padding:5px 10px;font-size:12px}
+  button.on{background:var(--accent);color:#1b1b27;border-color:var(--accent)}
+  .meta{color:var(--muted);font-size:12px}
+  .hint{color:var(--muted);font-size:12px;margin-top:8px;line-height:1.7}
+  .status{min-height:18px;font-size:12px;color:var(--accent);margin-top:8px}
+  select{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:13px}
+  textarea{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:10px;font-size:13px;width:100%;resize:vertical;font-family:inherit}
+  .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;white-space:nowrap}
+  .pill.partner{background:rgba(224,137,75,.16);color:var(--partner);border:1px solid var(--partner)}
+  .pill.me{background:rgba(95,179,122,.16);color:var(--me);border:1px solid var(--me)}
+  .pill.duo{background:rgba(122,162,247,.16);color:var(--accent2);border:1px solid var(--accent2)}
+  .chip{display:inline-block;padding:3px 9px;border-radius:6px;font-size:12px;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
+  .beats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  @media(max-width:760px){.beats{grid-template-columns:repeat(2,1fr)}}
+  .beat{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px;cursor:pointer;transition:.15s}
+  .beat:hover{border-color:var(--accent);transform:translateY(-1px)}
+  .beat b{color:var(--accent);font-size:13px}
+  .beat div{font-size:12.5px;margin-top:4px;line-height:1.5}
+  .beat .hook{margin-top:6px;color:var(--accent2);font-style:italic;font-size:12px;word-break:break-word}
+  .beat.cur{border-color:var(--accent);box-shadow:0 0 0 1px rgba(212,168,67,.35)}
+
+  /* 练习面板 */
+  .practice{border-color:var(--accent)}
+  .turn-panel{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .turn-head{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px}
+  .cuebox{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+  .cue{font-size:12.5px;line-height:1.6;border-radius:8px;padding:7px 10px;border-left:3px solid var(--cueA);background:rgba(122,162,247,.08);color:var(--text)}
+  .cue.tip{border-left-color:var(--cueT);background:rgba(199,146,234,.08)}
+  .cue.scene{border-left-color:var(--muted);background:rgba(154,160,184,.07)}
+  .cue b{color:var(--accent2)}
+  .cue.tip b{color:var(--cueT)}
+  .prev-anchor{background:rgba(212,168,67,.08);border-left:3px solid var(--accent);border-radius:8px;padding:8px 10px;margin-top:10px;font-size:13px;line-height:1.65}
+  .linebox{margin-top:12px;font-size:17px;line-height:1.75;word-break:break-word}
+  .hidden-text{filter:blur(7px);user-select:none;-webkit-user-select:none}
+  .anchor{color:var(--muted);font-style:italic;font-size:14px}
+  .hide{display:none}
+  .zh{color:var(--muted);font-size:13px;margin-top:6px}
+  .segcur{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:2px 8px;font-size:12px;color:var(--muted)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:680px){.grid2{grid-template-columns:1fr}}
+
+  /* 脚本列表 */
+  .script-block{border-bottom:1px dashed var(--line);padding:9px 2px}
+  .scene-h{font-size:14px;font-weight:700;color:var(--accent);margin:16px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--line)}
+  .beat-h{font-size:13px;font-weight:700;color:var(--text);margin:12px 0 4px}
+  .beat-h:before{content:"◆ ";color:var(--accent)}
+  .ln{display:flex;gap:10px;align-items:flex-start;padding:7px 8px;border-radius:8px;cursor:pointer;transition:.12s}
+  .ln:hover{background:var(--panel2)}
+  .ln.active{background:rgba(212,168,67,.12);box-shadow:inset 0 0 0 1px rgba(212,168,67,.35)}
+  .ln .txt{flex:1;font-size:14px;line-height:1.6;word-break:break-word}
+  .ln .zh2{color:var(--muted);font-size:12px;margin-top:3px}
+  .lnctx{font-size:12.5px;color:var(--muted);padding:4px 8px;line-height:1.6}
+  .lnctx b{color:var(--accent2)}
+  .lnctx.tip b{color:var(--cueT)}
+
+  /* 锚点训练 */
+  .anchor-card{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:11px 12px;margin-bottom:9px}
+  .anchor-card .top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .anchor-card .body{margin-top:8px;font-size:15px;line-height:1.7}
+  .anchor-card .body .first{color:var(--accent);font-weight:700;font-size:17px}
+  .anchor-card .body .rest{color:var(--muted)}
+  .badge{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:1px 6px;margin-left:6px}
+  kbd{background:var(--panel2);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:1px 6px;font-size:11px;font-family:inherit}
+  .empty{color:var(--muted);font-style:italic;padding:10px 0}
+  @media (pointer:coarse){
+    button{padding:10px 14px;min-height:44px}
+    button.sm{padding:8px 12px;min-height:40px}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1><span class="en" id="h1en"></span><span id="h1cn"></span> — 台词记忆训练器 <span class="badge">纯本地 · 离线 · 手机可用</span></h1>
+  <p id="h1sub"></p>
+</header>
+
+<div class="wrap">
+
+  <details class="card help-card" open id="helpCard">
+    <summary id="helpSummary">🎭 使用说明 · 记忆法 · 排练节奏（点这里收起）</summary>
+    <div class="help-body" id="helpBody"></div>
+  </details>
+
+  <div class="card">
+    <h2>① 声音设置 <span class="badge">浏览器合成 · 零成本</span></h2>
+    <div class="row" id="voiceRow" style="gap:14px"></div>
+    <div class="row" style="margin-top:10px">
+      <button id="btnEnter" class="primary">🎙 进入练习</button>
+      <button id="btnSampleAll" class="sm">▶ 试听全文</button>
+      <button id="btnStopAll" class="sm">⏹ 停止</button>
+      <button id="btnCopyHelp" class="sm">📋 复制使用说明（发剧组群）</button>
+    </div>
+    <div class="hint">💡 浏览器内置语音由系统决定（Windows 有 Microsoft 英文音，手机有 Google/Siri 英文音）。首次可能不出声，点一下任意播放按钮即可。</div>
+    <div class="status" id="voiceStatus"></div>
+  </div>
+
+  <div class="card">
+    <h2><span id="beatTitle">② 骨架速记</span> <span class="badge">先记这个，再背台词</span></h2>
+    <div class="beats" id="beatsWrap"></div>
+    <div class="hint" id="beatHint"></div>
+  </div>
+
+  <div class="card practice" id="practiceCard">
+    <h2>③ 顺序练习</h2>
+    <div class="row" style="margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <span class="meta">🎭 我的角色（可多选）：</span>
+      <div id="meChips" class="row" style="gap:6px"></div>
+      <span class="meta" style="width:100%">绿色 = 你的台词，停下等你脱稿；橙色 = 对方台词，自动播放。另可选「只看我 / 只看对方」快速跳句。</span>
+    </div>
+    <div class="row" style="margin-bottom:12px">
+      <button id="btnStart" class="primary big">▶ 从头开始练习</button>
+      <button id="btnPlayPause" class="big">▶ 播放当前句</button>
+      <button id="btnLoop" class="big">🔁 循环本句</button>
+      <button id="btnStop" class="big">⏹ 停止</button>
+      <span class="segcur" id="segCur">—</span>
+    </div>
+
+    <div class="turn-panel">
+      <div class="turn-head" id="turnHead"><b>准备开始</b></div>
+      <div id="cueBox" class="cuebox"></div>
+      <div id="prevBox"></div>
+      <div class="linebox" id="turnText"></div>
+      <div class="zh" id="turnZh"></div>
+      <div class="row" id="turnBtns" style="margin-top:14px"></div>
+    </div>
+
+    <div class="grid2" style="margin-top:14px" id="turnGrid">
+      <div class="card" style="background:var(--panel2);margin:0" id="partnerCard">
+        <div class="meta">👥 对方的台词 <span class="pill partner">自动播放</span></div>
+        <div class="row" style="margin-top:8px">
+          <button class="sm" id="btnPartnerPrev">⬅️ 上一句</button>
+          <button class="sm" id="btnPartnerPlay">▶ 播放本句</button>
+          <button class="sm" id="btnPartnerNext">下一句 ➡️</button>
+        </div>
+      </div>
+      <div class="card" style="background:var(--panel2);margin:0">
+        <div class="meta">🙋 我的台词 <span class="pill me">停下等你</span></div>
+        <div class="row" style="margin-top:8px">
+          <button class="sm" id="btnMePrev">⬅️ 上一句</button>
+          <button class="sm" id="btnMePlay">▶ 试听本句</button>
+          <button class="sm" id="btnMeNext">下一句 ➡️</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>④ 锚点训练 <span class="badge">只背每句开头两个词</span></h2>
+    <div class="row" style="margin-bottom:10px">
+      <button id="btnAnchorReveal" class="sm">👁 全部显示 / 隐藏</button>
+      <button id="btnCheat" class="primary sm">📝 生成我的台词小抄（复制）</button>
+      <span class="meta">红色加粗 = 锚点；后面灰色部分先不看，能在心里接上就算过。</span>
+    </div>
+    <div id="anchorWrap"><div class="empty">（在「我的角色」里选好角色后，这里会列出你要背的每一句。）</div></div>
+  </div>
+
+  <div class="card">
+    <h2><span id="listTitle">⑤ 全篇台词一览</span> <span class="badge">点击任意一句可直接播放</span></h2>
+    <div id="scriptWrap"></div>
+  </div>
+
+</div>
+
+<script>
+"use strict";
+
+/* ============================================================
+   剧本数据 —— 由 build_memory_html.py 从 data.json 注入
+   码：B=段落标题  S=场景  A=动作  T=提示  L=台词
+   ============================================================ */
+var CFG = (function(){
+  var el = document.getElementById("script-data");
+  if(!el) return {};
+  try { return JSON.parse(el.textContent); } catch(e){ console.error("script-data JSON 解析失败", e); return {}; }
+})();
+
+function arr(it){                       // 兼容对象与数组两种写法
+  if(it && !Array.isArray(it) && typeof it === "object"){
+    if(it.k === "L") return ["L", it.role || "", it.text || "", it.zh || ""];
+    return [it.k || "A", it.text || ""];
+  }
+  return it;
+}
+
+var SCENES = (CFG.scenes || []).map(function(sc){
+  return { name: sc.name || "", items: (sc.items || []).map(arr) };
+});
+var BEATS = (CFG.beats || []).map(function(b){
+  if(Array.isArray(b)) return [b[0] || "", b[1] || "", b[2] || ""];
+  return [b.name || "", b.title || "", b.key || ""];
+});
+var ROLES = (CFG.roles || []).slice();
+var ENS   = CFG.ensemble || (ROLES.filter(function(r){ return r.indexOf("&") >= 0; })[0] || "");
+var LABEL = CFG.labels || {};
+var ANCHOR_N = Math.max(1, CFG.anchorWords || 2);   // 锚点 = 台词开头几个词
+var CHEAT_N  = Math.max(1, CFG.cheatWords  || 3);   // 小抄 = 台词开头几个词
+var BEAT_UNIT = CFG.beatUnit || "段";
+function L(k, d){ return LABEL[k] || d; }
+function speakRoles(){ return ROLES.filter(function(r){ return r !== ENS; }); }
+function hasPartner(){ return LINES.some(function(l){ return !isMine(l.role); }); }
+function defaultMyRoles(){
+  if(CFG.myRoles && CFG.myRoles.length) return CFG.myRoles.slice();
+  var sr = speakRoles();
+  if(sr.length <= 1) return (sr.length ? sr : ROLES).slice();  // 单人讲稿：默认全部都是「我」
+  return [sr[0]];
+}
+
+/* ---------- 展开为序列 ---------- */
+var LINES = [];   // 仅台词行（练习序列）
+var ALL = [];     // 全部块（用于一览）
+(function(){
+  var pending = [];
+  SCENES.forEach(function(sc){
+    var curBeat = "";
+    sc.items.forEach(function(it){
+      var code = it[0];
+      if(code==="B"){
+        curBeat = it[1];
+        ALL.push({k:"B", scene:sc.name, beat:curBeat, text:it[1]});
+        return;
+      }
+      if(code==="L"){
+        var line = {k:"L", scene:sc.name, beat:curBeat, role:it[1], text:it[2], zh:it[3]||"", cues:pending.slice()};
+        pending = [];
+        line.seq = LINES.length;
+        LINES.push(line); ALL.push(line);
+        return;
+      }
+      pending.push({k:code, text:it[1]});
+      ALL.push({k:code, scene:sc.name, beat:curBeat, text:it[1]});
+    });
+  });
+})();
+
+/* ---------- 状态 ---------- */
+var meRoles = defaultMyRoles();   // 我的角色（可多选）
+var voiceNames = {};             // 角色 → 语音名
+var loopOn = false;
+var curIdx = -1;
+var isPlaying = false;
+var playToken = 0;
+var anchorHidden = true;          // 锚点训练：是否隐藏除锚点外的内容
+var STATE_KEY = CFG.stateKey || "script_memory_state_v1";
+
+var $ = function(id){ return document.getElementById(id); };
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function status(m){ var el=$("voiceStatus"); if(el) el.textContent=m; }
+function isMine(role){
+  if(ENS && role===ENS) return speakRoles().some(function(r){ return meRoles.indexOf(r)>=0; });
+  return meRoles.indexOf(role)>=0;
+}
+function rolePillClass(role){ if(ENS && role===ENS) return "duo"; return isMine(role)?"me":"partner"; }
+
+/* ---------- 语音 ---------- */
+function allVoices(){
+  if(!window.speechSynthesis) return [];
+  var v = speechSynthesis.getVoices() || [];
+  var en = v.filter(function(x){ return /^en/i.test(x.lang); });
+  return en.length ? en.concat(v.filter(function(x){ return !/^en/i.test(x.lang); })) : v;
+}
+function pickVoices(){
+  var vs = allVoices().filter(function(v){ return /^en/i.test(v.lang); });
+  if(!vs.length) vs = allVoices();
+  if(!vs.length) return;
+  var pref = vs.slice().sort(function(a,b){
+    var s=function(n){ return (/natural|neural|online|google/i.test(n)?2:0) + (/female|male/i.test(n)?1:0); };
+    return s(b.name)-s(a.name);
+  });
+  var pool = pref.length ? pref : vs;
+  if(!pool.length) return;
+  speakRoles().forEach(function(r, i){
+    if(voiceNames[r]) return;
+    var cand = pool[i % pool.length];
+    voiceNames[r] = cand ? cand.name : "";
+  });
+}
+function findVoice(name){
+  if(!name) return null;
+  var vs = allVoices();
+  for(var i=0;i<vs.length;i++){ if(vs[i].name===name) return vs[i]; }
+  return null;
+}
+function voiceForRole(role){
+  if(ENS && role===ENS){
+    // 齐诵：优先用「非我」那一方的声音，让耳朵听到另一个音色
+    var other = speakRoles().filter(function(r){ return !isMine(r) && voiceNames[r]; })[0];
+    if(other) return findVoice(voiceNames[other]);
+    var any = speakRoles().filter(function(r){ return voiceNames[r]; })[0];
+    return any ? findVoice(voiceNames[any]) : null;
+  }
+  return findVoice(voiceNames[role]) || null;
+}
+
+function renderVoiceRow(){
+  var vs = allVoices();
+  var html = "";
+  speakRoles().forEach(function(r){
+    var opts = '<option value="">（系统默认）</option>' + vs.map(function(v){
+      return '<option value="'+esc(v.name)+'"'+(v.name===voiceNames[r]?' selected':'')+'>'+esc(v.name+' · '+v.lang)+'</option>';
+    }).join("");
+    html += '<div><div class="meta">角色 <b style="color:var(--text)">'+r+'</b> 的声音</div><select data-vr="'+r+'" style="margin-top:4px;min-width:210px">'+opts+'</select></div>';
+  });
+  $("voiceRow").innerHTML = html;
+  var sels = document.querySelectorAll('select[data-vr]');
+  for(var i=0;i<sels.length;i++){
+    sels[i].onchange = function(e){
+      voiceNames[e.target.getAttribute("data-vr")] = e.target.value;
+      saveState();
+      status("已更新音色");
+    };
+  }
+}
+
+/* ---------- 播放 ---------- */
+function stopPlayback(){
+  playToken++;
+  if(window.speechSynthesis) speechSynthesis.cancel();
+  isPlaying = false;
+  updatePlayUI();
+}
+function speakLine(line, cb){
+  if(!window.speechSynthesis) return;
+  var tok = ++playToken;
+  var u = new SpeechSynthesisUtterance(line.text);
+  var v = voiceForRole(line.role);
+  if(v) u.voice = v;
+  u.rate = 0.95; u.pitch = 1;
+  u.onend = function(){ if(tok!==playToken) return; isPlaying=false; updatePlayUI(); if(cb) cb(); };
+  u.onerror = function(){ if(tok!==playToken) return; isPlaying=false; updatePlayUI(); if(cb) cb(); };
+  isPlaying = true; updatePlayUI();
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
+}
+function playLine(i, cb){
+  if(i<0 || i>=LINES.length) return;
+  stopPlayback();
+  curIdx = i; markActive(); updateSegCur(); renderTurn(i, true);
+  speakLine(LINES[i], cb);
+}
+function updatePlayUI(){
+  var b = $("btnPlayPause");
+  if(b) b.textContent = isPlaying ? "⏸ 暂停" : "▶ 播放当前句";
+}
+
+/* ---------- 练习流程 ---------- */
+function goTo(i){
+  if(LINES.length===0) return;
+  if(i>=LINES.length){
+    stopPlayback();
+    $("turnHead").innerHTML = "<b>🎉 全剧过完一遍！</b>";
+    $("cueBox").innerHTML = ""; $("prevBox").innerHTML = "";
+    $("turnText").textContent = "再来一遍点「▶ 从头开始练习」；换角色点上方角色标签。";
+    $("turnZh").textContent = ""; $("turnBtns").innerHTML = "";
+    curIdx = -1; markActive(); return;
+  }
+  if(i<0) i=0;
+  stopPlayback();
+  curIdx = i; markActive(); markBeat(); updateSegCur();
+  var line = LINES[i];
+  if(isMine(line.role)){ renderTurn(i, false); }
+  else { renderTurn(i, true); playLine(i, function(){ goTo(i+1); }); }
+}
+function renderTurn(i, playing){
+  var line = LINES[i];
+  var mine = isMine(line.role);
+  $("turnHead").innerHTML =
+    '<span class="pill '+rolePillClass(line.role)+'">'+esc(line.role)+'</span>' +
+    '<span class="chip">'+esc(line.beat || line.scene.split(" · ")[0])+'</span>' +
+    '<span class="segcur">第 '+(i+1)+' / '+LINES.length+' 句</span>' +
+    '<span class="meta">'+(mine ? '你的台词 · 停下等你脱稿' : '对方台词 · 自动播放')+'</span>';
+
+  // 场景/动作/提示 cue
+  var cueHtml = "";
+  if(line.scene && line.cues.length===0){ cueHtml += ''; }
+  line.cues.forEach(function(c){
+    var cls = c.k==="S" ? "cue scene" : (c.k==="T" ? "cue tip" : "cue");
+    var label = c.k==="S" ? L("S","场景") : (c.k==="T" ? L("T","提示") : L("A","动作"));
+    cueHtml += '<div class="'+cls+'"><b>【'+label+'】</b>'+esc(c.text)+'</div>';
+  });
+  $("cueBox").innerHTML = cueHtml;
+
+  // 上一句锚点
+  var prevHtml = "";
+  if(i>0){
+    var p = LINES[i-1];
+    var words = p.text.trim().split(/\s+/);
+    var tail = words.slice(-5).join(" ");
+    prevHtml = '<div class="prev-anchor"><span class="pill '+rolePillClass(p.role)+'">'+esc(p.role)+'</span> 说到：<i>… '+esc(tail)+'</i>'+(p.zh?' ｜ 大意：<b>'+esc(p.zh)+'</b>':'')+'</div>';
+  }
+  $("prevBox").innerHTML = prevHtml;
+
+  var tEl = $("turnText"); var zEl = $("turnZh"); var bEl = $("turnBtns");
+  bEl.innerHTML = "";
+
+  if(!mine){
+    tEl.innerHTML = '<span class="anchor">（'+esc(line.role)+' 的台词，正在播放…听不清可点「🔁 循环本句」或「▶ 播放当前句」）</span>';
+    zEl.textContent = line.zh ? "大意：" + line.zh : "";
+    var nx = document.createElement("button");
+    nx.textContent = "⏭ 跳过，下一句"; nx.className = "primary";
+    nx.onclick = function(){ advance(); goTo(i+1); };
+    bEl.appendChild(nx);
+  } else {
+    tEl.innerHTML = '<span id="meText" class="hidden-text">'+esc(line.text)+'</span>'
+                  + '<span id="meAnchor" class="anchor" style="display:none"></span>';
+    zEl.textContent = "";
+    var bAnchor = document.createElement("button");
+    bAnchor.textContent = "💡 看锚点（前几个词）"; bAnchor.className = "sm";
+    bAnchor.onclick = function(){
+      var w = line.text.trim().split(/\s+/).slice(0,ANCHOR_N).join(" ");
+      var a = $("meAnchor"), m = $("meText");
+      if(a){ a.textContent = "锚点：" + w + " …"; a.style.display = ""; }
+      if(m){ m.classList.add("hide"); m.classList.remove("hidden-text"); }
+      var zz = $("turnZh"); if(zz && line.zh) zz.textContent = "大意：" + line.zh;
+    };
+    var bReveal = document.createElement("button");
+    bReveal.textContent = "👁 显示全文"; bReveal.className = "sm";
+    bReveal.onclick = function(){
+      var m = $("meText"), a = $("meAnchor");
+      if(m){ m.classList.remove("hide"); m.classList.remove("hidden-text"); }
+      if(a) a.style.display = "none";
+      var zz = $("turnZh"); if(zz && line.zh) zz.textContent = "大意：" + line.zh;
+    };
+    var bHear = document.createElement("button");
+    bHear.textContent = "▶ 试听本句"; bHear.className = "sm";
+    bHear.onclick = function(){ speakLine(line); };
+    var bDone = document.createElement("button");
+    bDone.textContent = "✓ 我说完了 → 下一句"; bDone.className = "primary";
+    bDone.onclick = function(){ advance(); goTo(i+1); };
+    var bReplay = document.createElement("button");
+    bReplay.textContent = "🔁 重听上一句"; bReplay.className = "sm";
+    bReplay.onclick = function(){ if(i-1>=0){ stopPlayback(); speakLine(LINES[i-1]); } };
+    bEl.appendChild(bHear); bEl.appendChild(bAnchor); bEl.appendChild(bReveal); bEl.appendChild(bDone); bEl.appendChild(bReplay);
+  }
+}
+function advance(){ loopOn=false; $("btnLoop").classList.remove("on"); stopPlayback(); }
+function updateSegCur(){
+  $("segCur").textContent = LINES.length ? ("共 " + LINES.length + " 句 · 当前第 " + (curIdx+1) + " 句") : "—";
+}
+function markActive(){
+  var rows = document.querySelectorAll('.ln[data-line]');
+  for(var i=0;i<rows.length;i++){
+    rows[i].classList.remove("active");
+    if(+rows[i].getAttribute("data-line")===curIdx) rows[i].classList.add("active");
+  }
+  var bs = document.querySelectorAll('.beat');
+  for(var j=0;j<bs.length;j++){
+    bs[j].classList.remove("cur");
+  }
+}
+
+/* ---------- 我的角色 chips ---------- */
+function renderMeChips(){
+  var wrap = $("meChips");
+  wrap.innerHTML = ROLES.map(function(r){
+    var me = isMine(r);
+    return '<button class="pill '+(me?"me":"partner")+'" data-me="'+esc(r)+'" style="border-radius:999px;padding:7px 14px;cursor:pointer">'+(me?"✓ ":"")+esc(r)+(me?"（我）":"")+'</button>';
+  }).join("");
+  var btns = wrap.querySelectorAll('button[data-me]');
+  for(var i=0;i<btns.length;i++){
+    btns[i].onclick = function(e){
+      var r = e.currentTarget.getAttribute("data-me");
+      if(meRoles.indexOf(r)>=0){
+        if(ENS && r===ENS) return;    // 齐诵角色由单人角色推导
+        if(meRoles.length>1){ meRoles = meRoles.filter(function(x){ return x!==r; }); }
+        else { status("至少保留一个「我的角色」"); return; }
+      } else {
+        if(ENS && r===ENS) { speakRoles().forEach(function(x){ if(meRoles.indexOf(x)<0) meRoles.push(x); }); }
+        else meRoles.push(r);
+      }
+      renderMeChips(); renderAnchors(); saveState();
+      status("🎭 我的角色：" + meRoles.join("、"));
+    };
+  }
+}
+/* 齐诵角色特殊：点它等于同时选中所有单人角色 */
+
+/* ---------- 8 拍骨架 ---------- */
+function renderBeats(){
+  $("beatsWrap").innerHTML = BEATS.map(function(b,i){
+    return '<div class="beat" data-beat="'+i+'"><b>'+esc(b[0])+'</b><div>'+esc(b[1])+'</div>'
+      + (b[2] ? '<div class="hook">'+esc(b[2])+'</div>' : '') + '</div>';
+  }).join("");
+  var bs = document.querySelectorAll('.beat');
+  for(var i=0;i<bs.length;i++){
+    bs[i].onclick = function(e){
+      var n = +e.currentTarget.getAttribute("data-beat");
+      var tgt = 0;
+      for(var k=0;k<LINES.length;k++){ if(LINES[k].beatIdx===n){ tgt=k; break; } }
+      goTo(tgt);
+      $("practiceCard").scrollIntoView({behavior:"smooth", block:"start"});
+    };
+  }
+}
+function markBeat(){
+  // 高亮当前拍
+  var bs = document.querySelectorAll('.beat');
+  var cur = (curIdx>=0 && LINES[curIdx]) ? LINES[curIdx].beatIdx : -1;
+  for(var i=0;i<bs.length;i++){
+    var on = (typeof cur==="number" && cur>=0 && bs[i].getAttribute("data-beat")!==null && +bs[i].getAttribute("data-beat")===cur);
+    bs[i].classList.toggle("cur", !!on);
+  }
+}
+
+/* ---------- 锚点训练 ---------- */
+function renderAnchors(){
+  var mine = LINES.filter(function(l){ return isMine(l.role); });
+  if(!mine.length){ $("anchorWrap").innerHTML = '<div class="empty">（先在「我的角色」里选好角色。）</div>'; return; }
+  $("anchorWrap").innerHTML = mine.map(function(l){
+    var words = l.text.trim().split(/\s+/);
+    var first = words.slice(0,ANCHOR_N).join(" ");
+    var rest = words.slice(ANCHOR_N).join(" ");
+    return '<div class="anchor-card">'
+      + '<div class="top"><span class="pill '+rolePillClass(l.role)+'">'+esc(l.role)+'</span>'
+      + '<span class="chip">'+esc(l.beat || l.scene)+'</span>'
+      + '<button class="sm" data-playline="'+l.seq+'">▶ 听整句</button>'
+      + '<button class="sm" data-toggle="'+l.seq+'">👁 显示/隐藏</button></div>'
+      + '<div class="body"><span class="first">'+esc(first)+'</span>'
+      + '<span class="rest'+(anchorHidden?' hide':'')+'" data-rest="'+l.seq+'"> '+esc(rest)+'</span>'
+      + '</div>'
+      + (l.zh ? '<div class="zh" data-zh="'+l.seq+'"'+(anchorHidden?' style="display:none"':'')+'>大意：'+esc(l.zh)+'</div>' : '')
+      + '</div>';
+  }).join("");
+  var ps = $("anchorWrap").querySelectorAll('button[data-playline]');
+  for(var i=0;i<ps.length;i++){ ps[i].onclick = function(e){ stopPlayback(); var line=LINES[+e.currentTarget.getAttribute("data-playline")]; speakLine(line); }; }
+  var ts = $("anchorWrap").querySelectorAll('button[data-toggle]');
+  for(var j=0;j<ts.length;j++){ ts[j].onclick = function(e){ toggleAnchor(+e.currentTarget.getAttribute("data-toggle")); }; }
+}
+function toggleAnchor(seq){
+  var rest = $("anchorWrap").querySelector('[data-rest="'+seq+'"]');
+  var zh = $("anchorWrap").querySelector('[data-zh="'+seq+'"]');
+  if(rest) rest.classList.toggle("hide");
+  if(zh) zh.style.display = (zh.style.display==="none") ? "" : "none";
+}
+function toggleAllAnchors(){
+  anchorHidden = !anchorHidden;
+  var rests = $("anchorWrap").querySelectorAll('[data-rest]');
+  for(var i=0;i<rests.length;i++){ rests[i].classList.toggle("hide", anchorHidden); }
+  var zhs = $("anchorWrap").querySelectorAll('[data-zh]');
+  for(var j=0;j<zhs.length;j++){ zhs[j].style.display = anchorHidden ? "none" : ""; }
+}
+
+/* ---------- 台词小抄 ---------- */
+function buildCheatSheet(){
+  var mine = LINES.filter(function(l){ return isMine(l.role); });
+  var out = ["《" + (CFG.title || "剧本") + "》" + (CFG.subtitle ? CFG.subtitle + "·" : "") + "台词小抄（我的角色：" + meRoles.join("、") + "）", ""];
+  mine.forEach(function(l,i){
+    var words = l.text.trim().split(/\s+/);
+    var first = words.slice(0,CHEAT_N).join(" ");
+    out.push((i+1) + ". [" + (l.beat||"—") + "] " + l.role + "：" + first + " …");
+  });
+  out.push("");
+  out.push("—— 忘了词就想「现在第几拍、画面是什么」，再照锚点接下去。");
+  return out.join("\n");
+}
+function copyText(txt, okMsg){
+  var done = function(ok){ status(ok ? okMsg : "复制失败，请手动全选复制"); };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(function(){ done(true); }).catch(function(){ done(false); });
+  } else {
+    var ta = document.createElement("textarea"); ta.value = txt; document.body.appendChild(ta); ta.select();
+    try{ document.execCommand("copy"); }catch(e){} ta.remove(); done(true);
+  }
+}
+
+/* ---------- 全剧一览 ---------- */
+function renderScript(){
+  var html = "";
+  SCENES.forEach(function(sc){
+    html += '<div class="scene-h">'+esc(sc.name)+'</div>';
+    sc.items.forEach(function(it){
+      var code = it[0];
+      if(code==="B"){ html += '<div class="beat-h">'+esc(it[1])+'</div>'; return; }
+      if(code==="S"){ html += '<div class="lnctx"><b>【'+esc(L("S","场景"))+'】</b>'+esc(it[1])+'</div>'; return; }
+      if(code==="A"){ html += '<div class="lnctx"><b>【'+esc(L("A","动作"))+'】</b>'+esc(it[1])+'</div>'; return; }
+      if(code==="T"){ html += '<div class="lnctx tip"><b>【'+esc(L("T","提示"))+'】</b>'+esc(it[1])+'</div>'; return; }
+      // line
+      var seq = -1;
+      for(var k=0;k<LINES.length;k++){ if(LINES[k].text===it[2] && LINES[k].role===it[1]){ seq=k; break; } }
+      var mine = isMine(it[1]);
+      html += '<div class="ln" data-line="'+seq+'">'
+        + '<span class="pill '+rolePillClass(it[1])+'">'+esc(it[1])+'</span>'
+        + '<div class="txt">'+esc(it[2])+(it[3]?'<div class="zh2">'+esc(it[3])+'</div>':'')+'</div>'
+        + (mine?'<span class="meta" style="white-space:nowrap">我的</span>':'')
+        + '</div>';
+    });
+  });
+  $("scriptWrap").innerHTML = html;
+  var rows = $("scriptWrap").querySelectorAll('.ln[data-line]');
+  for(var i=0;i<rows.length;i++){
+    rows[i].onclick = function(e){
+      var seq = +e.currentTarget.getAttribute("data-line");
+      if(seq<0) return;
+      stopPlayback(); curIdx = seq; markActive(); markBeat(); updateSegCur();
+      renderTurn(seq, true); speakLine(LINES[seq]);
+      $("practiceCard").scrollIntoView({behavior:"smooth", block:"start"});
+    };
+  }
+}
+
+/* ---------- 持久化 ---------- */
+function saveState(){
+  try{
+    localStorage.setItem(STATE_KEY, JSON.stringify({ meRoles:meRoles, voiceNames:voiceNames, curIdx:curIdx }));
+  }catch(e){}
+}
+function restoreState(){
+  try{
+    var raw = localStorage.getItem(STATE_KEY); if(!raw) return;
+    var st = JSON.parse(raw);
+    if(Array.isArray(st.meRoles) && st.meRoles.length){
+      var kept = st.meRoles.filter(function(r){ return ROLES.indexOf(r)>=0; });
+      if(kept.length) meRoles = kept;
+    }
+    if(!meRoles.length) meRoles = defaultMyRoles();
+    if(st.voiceNames && typeof st.voiceNames==="object"){
+      Object.keys(st.voiceNames).forEach(function(k){
+        if(ROLES.indexOf(k)>=0 && st.voiceNames[k]) voiceNames[k] = st.voiceNames[k];
+      });
+    }
+    curIdx = (typeof st.curIdx==="number" && st.curIdx>=0 && st.curIdx<LINES.length) ? st.curIdx : -1;
+  }catch(e){}
+}
+
+/* ---------- 事件绑定 ---------- */
+$("btnStart").onclick = function(){ stopPlayback(); goTo(0); $("practiceCard").scrollIntoView({behavior:"smooth"}); };
+$("btnPlayPause").onclick = function(){ if(isPlaying) stopPlayback(); else if(curIdx>=0) playLine(curIdx, function(){ if(!isMine(LINES[curIdx].role)) goTo(curIdx+1); }); else goTo(0); };
+$("btnStop").onclick = function(){ stopPlayback(); status("已停止"); };
+function loopPlay(i){
+  if(!loopOn || i<0 || i>=LINES.length) return;
+  stopPlayback();
+  curIdx = i; markActive(); markBeat(); updateSegCur();
+  renderTurn(i, true);
+  speakLine(LINES[i], function(){ if(loopOn) loopPlay(i); });
+}
+$("btnLoop").onclick = function(){
+  loopOn = !loopOn; $("btnLoop").classList.toggle("on", loopOn);
+  if(loopOn){
+    var i = curIdx>=0 ? curIdx : 0;
+    curIdx = i; status("🔁 循环本句：开启（听够了再关掉）");
+    loopPlay(i);
+  } else { status("循环已关闭"); }
+};
+$("btnPartnerPrev").onclick = function(){ jump(false,-1); };
+$("btnPartnerNext").onclick = function(){ jump(false, 1); };
+$("btnPartnerPlay").onclick = function(){ if(curIdx>=0 && !isMine(LINES[curIdx].role)) speakLine(LINES[curIdx]); else jump(false,1); };
+$("btnMePrev").onclick = function(){ jump(true,-1); };
+$("btnMeNext").onclick = function(){ jump(true, 1); };
+$("btnMePlay").onclick = function(){ if(curIdx>=0 && isMine(LINES[curIdx].role)) speakLine(LINES[curIdx]); else jump(true,1); };
+function jump(wantMine, dir){
+  var from = (curIdx<0 ? (dir>0?-1:0) : curIdx);
+  var i = from + dir;
+  while(i>=0 && i<LINES.length){ if(isMine(LINES[i].role)===wantMine){ goTo(i); return; } i+=dir; }
+  status(wantMine ? "没有更多「我」的台词了" : "没有更多「对方」的台词了");
+}
+$("btnEnter").onclick = function(){
+  if(!window.speechSynthesis){ alert("当前浏览器不支持语音合成，请用 Chrome / Edge / Safari"); return; }
+  pickVoices(); renderVoiceRow();
+  status("✅ 已就绪，点「▶ 从头开始练习」开始。");
+  $("practiceCard").scrollIntoView({behavior:"smooth"});
+  if(curIdx<0) renderTurn(0,true);
+};
+$("btnSampleAll").onclick = function(){
+  if(!window.speechSynthesis){ alert("当前浏览器不支持语音合成"); return; }
+  pickVoices(); renderVoiceRow();
+  var k = 0;
+  status("试听全文开始…");
+  (function next(){
+    if(k>=LINES.length){ status("试听结束"); return; }
+    var line = LINES[k];
+    status("试听第 "+(k+1)+"/"+LINES.length+" 句："+line.role+" · "+line.text.slice(0,28)+"…");
+    var u = new SpeechSynthesisUtterance(line.text);
+    var v = voiceForRole(line.role); if(v) u.voice = v;
+    u.rate = 0.95;
+    u.onend = function(){ k++; next(); };
+    u.onerror = function(){ k++; next(); };
+    speechSynthesis.cancel(); speechSynthesis.speak(u);
+  })();
+};
+$("btnStopAll").onclick = function(){ stopPlayback(); status("已停止"); };
+$("btnAnchorReveal").onclick = toggleAllAnchors;
+$("btnCheat").onclick = function(){ copyText(buildCheatSheet(), "✅ 小抄已复制，粘到备忘录里抄成道具纸"); };
+function helpText(){
+  var parts = CFG.keyParts || [];
+  var rescue = CFG.rescueLines || [];
+  var s = "🎭《" + (CFG.title || "剧本") + (CFG.subtitle ? " · " + CFG.subtitle : "") + "》台词记忆训练器 使用说明\n\n"
+    + "【怎么打开】用电脑浏览器（Chrome / Edge / Safari）打开 index.html 即可，纯本地、不联网、不花钱。手机也能用。\n\n"
+    + "【三步开练】\n"
+    + "1. 在「🎭 我的角色」里选好你演的角色（可多选，同屏对练）\n"
+    + "2. 点「▶ 从头开始练习」\n"
+    + "3. 工具自动念对方的词；轮到你会遮罩显示，你脱稿说出来后点「✓ 我说完了 → 下一句」\n\n"
+    + "【卡壳怎么办】点「💡 看锚点」只显示前几个词；点「👁 显示全文」再看整句；点「🔁 重听上一句」找回接话节奏。\n\n"
+    + "【快捷键】空格=播放/暂停 · ← → =上一句/下一句 · Enter=我说完了 · L=循环本句 · Esc=停止\n\n"
+    + "【记忆法】先背「" + BEATS.length + " " + BEAT_UNIT + "骨架」→ 再背每句头 " + ANCHOR_N + " 个词（锚点训练）→ 把锚点抄到道具小抄上。";
+  if(parts.length) s += "\n\n【这出戏的万能零件】" + parts.join(" · ");
+  if(rescue.length) s += "\n\n【忘词保命三招】" + rescue.join(" / ");
+  return s;
+}
+$("btnCopyHelp").onclick = function(){
+  copyText(helpText(), "✅ 使用说明已复制，粘到剧组群里即可");
+};
+
+document.addEventListener("keydown", function(e){
+  var t = e.target.tagName;
+  if(t==="TEXTAREA" || t==="INPUT" || t==="SELECT") return;
+  if(e.key===" "){ e.preventDefault(); $("btnPlayPause").click(); }
+  else if(e.key==="ArrowLeft"){ e.preventDefault(); if(curIdx>0) goTo(curIdx-1); }
+  else if(e.key==="ArrowRight"){ e.preventDefault(); if(curIdx<LINES.length-1) goTo(curIdx+1); }
+  else if(e.key==="Enter"){ e.preventDefault(); if(curIdx>=0 && isMine(LINES[curIdx].role)){ goTo(curIdx+1); } }
+  else if(e.key==="l"||e.key==="L"){ $("btnLoop").click(); }
+  else if(e.key==="Escape"){ stopPlayback(); }
+});
+
+/* ---------- 启动 ---------- */
+function paintChrome(){
+  var t = CFG.title || "剧本";
+  document.title = t + " · 台词记忆训练器";
+  $("h1en").textContent = t;
+  $("h1cn").textContent = CFG.subtitle ? (" · " + CFG.subtitle) : "";
+  var sr = speakRoles();
+  $("h1sub").textContent = CFG.blurb || (
+    (sr.length > 1 ? sr.length + " 人剧本" : "单人讲稿") + " · "
+    + BEATS.length + " " + BEAT_UNIT + "骨架 · 共 " + LINES.length + " 句。"
+    + "选你的角色 → 工具自动念对方的词、轮到你就停下等你脱稿 → 卡壳看「锚点」。");
+  $("beatTitle").textContent = "② " + BEATS.length + " " + BEAT_UNIT + "骨架速记";
+  $("beatHint").textContent = CFG.beatHint || ("把整场戏记成 " + BEATS.length + " 个画面。忘了词，就想「现在在第几" + BEAT_UNIT + "、画面是什么」。点任意一" + BEAT_UNIT + "可直接跳到该" + BEAT_UNIT + "第一句。");
+  $("listTitle").textContent = "⑤ 全篇台词一览";
+}
+
+function renderHelp(){
+  var h = CFG.help || {};
+  var lead = h.lead || [
+    ["① 打开：", "用 Chrome / Edge / Safari 打开本页面即可，纯本地运行，不联网、不安装、不花钱，手机也能用。"],
+    ["② 选角色：", "点「🎭 我的角色」里的角色标签切换（可同时选多个同屏对练）。绿色 = 你的词，会停下等你；橙色 = 对方的词，自动播放。"],
+    ["③ 开始练：", "点「▶ 从头开始练习」→ 自动播放对方的台词 → 轮到你会遮罩显示 → 你脱稿说出来 → 点「✓ 我说完了 → 下一句」。卡壳点「💡 看锚点」只显示前几个词。"],
+    ["④ 快捷键：", "<kbd>空格</kbd>播放/暂停 · <kbd>←</kbd><kbd>→</kbd>上一句/下一句 · <kbd>Enter</kbd>我说完了 · <kbd>L</kbd>循环本句 · <kbd>Esc</kbd>停止。"],
+    ["⑤ 记忆法（按顺序做）：", null]
+  ];
+  var steps = h.steps || [
+    ["第 1 步 · 先记 " + BEATS.length + " " + BEAT_UNIT + "，不记台词", "把「" + BEATS.length + " " + BEAT_UNIT + "骨架」背下来（10 分钟），忘词时想画面，台词自己流出来。"],
+    ["第 2 步 · 只背每句开头 " + ANCHOR_N + " 个词（锚点法）", "见「锚点训练」区，红色加粗就是锚点。"],
+    ["第 3 步 · 吃透一套零件", (CFG.keyParts && CFG.keyParts.length) ? ("这出戏重复出现的句式：" + CFG.keyParts.join(" · ") + "，背一句白送两三句。") : "把重复出现的句式拆出来单练，背一句白送两三句。"],
+    ["第 4 步 · 道具小抄 = 合法提词器", "点「📝 生成我的台词小抄」，把每句头 " + CHEAT_N + " 个词抄到道具纸上，忘词瞄一眼。"],
+    ["第 5 步 · 录音跟读", "把对词录下来，走路睡前循环听。"]
+  ];
+  if(CFG.rescueLines && CFG.rescueLines.length){
+    steps.push(["第 6 步 · 忘词保命三招", CFG.rescueLines.join(" / ")]);
+  }
+  var html = "";
+  lead.forEach(function(x){
+    html += '<div class="help-step"><b>' + x[0] + '</b>' + (x[1] ? x[1] : "") + '</div>';
+    if(x[1] === null){
+      html += '<div class="help-sub">' + steps.map(function(s){
+        return '<b>' + s[0] + '</b>——' + s[1];
+      }).join('<br>') + '</div>';
+    }
+  });
+  if(h.cadence !== false){
+    html += '<div class="help-step"><b>⑥ 排练节奏：</b>'
+      + (CFG.cadence || "D1 通读全场 3 遍 + 录音 · D2 分" + BEAT_UNIT + "背（用「只看我」模式逐" + BEAT_UNIT + "过）· D3 合词对练、磨节奏 · D4 带动作走全场 2 遍 + 录像回看。")
+      + '</div>';
+  }
+  $("helpBody").innerHTML = html;
+}
+
+restoreState();
+paintChrome();
+renderHelp();
+if(!hasPartner()){
+  var pc = $("partnerCard"), tg = $("turnGrid");
+  if(pc) pc.style.display = "none";
+  if(tg) tg.style.gridTemplateColumns = "1fr";
+}
+renderVoiceRow();
+renderBeats();
+renderMeChips();
+renderAnchors();
+renderScript();
+updateSegCur();
+if(window.speechSynthesis){
+  speechSynthesis.onvoiceschanged = function(){ pickVoices(); renderVoiceRow(); };
+  setTimeout(function(){ pickVoices(); renderVoiceRow(); }, 400);
+}
+</script>
+</body>
+</html>

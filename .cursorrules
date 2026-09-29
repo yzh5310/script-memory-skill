@@ -1,0 +1,23 @@
+---
+description: script-memory — script to offline memorisation trainer
+globs: ["**/*.json", "**/*.html", "**/*.py", "**/*.js", "**/*.md"]
+alwaysApply: false
+---
+
+# script-memory
+
+Use when turning a script, dialogue, or speech draft into a normalised document plus
+a single-file offline rehearsal page.
+
+Read `SKILL.md` for the workflow. Hard constraints:
+
+- Dialogue in a `k=L` line is frozen: no typo fixes, no grammar smoothing, no spacing
+  changes. Flag anomalies in the delivery notes instead.
+- Normalise only scaffolding: numbering, speaker labels, stage-direction markers.
+- Skeleton must be 6-10 segments, each a picture rather than a summary.
+- Generated page must stay self-contained: no CDN, no build step, no network.
+- Gates, in order, all required:
+  `validate_data.py` → `check_fidelity.py` (must exit 0) → `smoke_boot.js`.
+- Single speaker (speech / monologue): one role, empty `ensemble`, `beatUnit: "段"`.
+  The page hides partner controls automatically — never fork the template.
+- `template.html` is data-driven: change `data.json` for content.

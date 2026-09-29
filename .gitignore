@@ -1,0 +1,28 @@
+# 生成产物
+/index.html
+/out/
+/dist/
+/build/
+*.zip
+
+# 抽取中间件
+*.blocks.json
+!examples/*.blocks.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 本地私稿（不要提交真实剧本）
+/work/
+/private/
+*.local.json

@@ -1,0 +1,48 @@
+{
+  "title": "Lost on Campus",
+  "subtitle": "校园迷路",
+  "beatUnit": "拍",
+  "anchorWords": 2,
+  "cheatWords": 3,
+  "blurb": "2 人短剧 · 3 拍骨架 · 约 1 分钟。选你的角色 → 工具自动念对方的词、轮到你就停下等你脱稿 → 卡壳看「锚点」。",
+  "keyParts": ["Excuse me? ×3", "Go straight / turn left ×2", "No problem! ×2"],
+  "rescueLines": [
+    "\"Sorry, my English is a bit slow today.\"",
+    "\"Wait — say that again?\"",
+    "把话头递给对手：\"You tell them!\""
+  ],
+  "scenes": [
+    {
+      "name": "第 1 场 · 问路",
+      "items": [
+        { "k": "S", "text": "校园主路，午休时间，人来人往。" },
+        { "k": "B", "text": "拍 1 · 开口问路" },
+        { "k": "A", "text": "B 拿着地图，左右张望，终于拦住 A。" },
+        { "k": "L", "role": "B", "text": "Excuse me? Sorry — do you speak English?", "zh": "打扰一下，你会说英语吗？" },
+        { "k": "L", "role": "A", "text": "Yes! A little. Where do you want to go?", "zh": "会！会一点。你想去哪儿？" },
+        { "k": "T", "text": "说到 A little 时用拇指和食指比一个很小的缝。" }
+      ]
+    },
+    {
+      "name": "第 2 场 · 指路",
+      "items": [
+        { "k": "B", "text": "拍 2 · 指路" },
+        { "k": "L", "role": "B", "text": "The library. I have been walking for twenty minutes.", "zh": "图书馆。我已经走了二十分钟了。" },
+        { "k": "A", "text": "A 指向前方，手掌摊开，动作要干脆。" },
+        { "k": "L", "role": "A", "text": "Go straight, then turn left. It is next to the canteen.", "zh": "直走，然后左转。就在食堂旁边。" },
+        { "k": "L", "role": "B", "text": "Go straight... turn left... next to the canteen. Got it!", "zh": "直走……左转……食堂旁边。记住了！" },
+        { "k": "T", "text": "B 一边重复一边用手指点，做出「在记」的样子。" }
+      ]
+    },
+    {
+      "name": "第 3 场 · 收尾",
+      "items": [
+        { "k": "B", "text": "拍 3 · 道谢" },
+        { "k": "L", "role": "B", "text": "Thank you so much! You saved my afternoon.", "zh": "太谢谢了！你救了我一下午。" },
+        { "k": "L", "role": "A", "text": "No problem! Follow the smell of noodles.", "zh": "没问题！跟着面香走就行。" },
+        { "k": "A", "text": "A 耸肩一笑，两人同时转向观众。" },
+        { "k": "L", "role": "A & B", "text": "Have a nice day!", "zh": "祝你今天愉快！" }
+      ]
+    }
+  ]
+}

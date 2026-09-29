@@ -1,0 +1,44 @@
+{
+  "title": "One Word",
+  "subtitle": "一个词",
+  "beatUnit": "段",
+  "anchorWords": 3,
+  "cheatWords": 4,
+  "blurb": "单人讲稿 · 3 段骨架 · 约 1 分钟。轮到你时点「✓ 我说完了 → 下一句」，卡壳看「锚点」。",
+  "keyParts": ["not A, but B 对比句式 ×2", "rhetorical question ×1"],
+  "rescueLines": [
+    "\"Let me put it another way.\"",
+    "\"Where was I? Right —\""
+  ],
+  "scenes": [
+    {
+      "name": "开场",
+      "items": [
+        { "k": "T", "text": "上台先站定两秒，看一圈观众再开口，不要边走边说。" },
+        { "k": "B", "text": "段 1 · 抛出一个词" },
+        { "k": "L", "role": "Speaker", "text": "Good morning. I want to start with one word. Courage.", "zh": "早上好。我想从一个词开始：勇气。" },
+        { "k": "A", "text": "说 Courage 时停顿一拍，手不要动。" },
+        { "k": "L", "role": "Speaker", "text": "Most of us think it means having no fear at all.", "zh": "我们大多以为它的意思是一点都不怕。" },
+        { "k": "T", "text": "说 Most of us 时放轻、放慢，像是替观众说心里话。" }
+      ]
+    },
+    {
+      "name": "主体",
+      "items": [
+        { "k": "B", "text": "段 2 · 换个定义" },
+        { "k": "L", "role": "Speaker", "text": "But courage is not the absence of fear. It is the decision that something else matters more.", "zh": "但勇气不是没有恐惧，而是决定有更重要的东西值得。" },
+        { "k": "A", "text": "not... but... 用手掌一翻，把前半句翻过去。" },
+        { "k": "L", "role": "Speaker", "text": "You felt it the first time you raised your hand in class.", "zh": "你在课堂上第一次举手时就感受过它。" }
+      ]
+    },
+    {
+      "name": "收束",
+      "items": [
+        { "k": "B", "text": "段 3 · 落到观众身上" },
+        { "k": "L", "role": "Speaker", "text": "So tomorrow, say the thing. Ask the question. Open your mouth.", "zh": "所以明天，把那句话说出口，把问题问出来，张开嘴。" },
+        { "k": "T", "text": "三个短句一句比一句快、一句比一句重，最后一句踏半步向前。" },
+        { "k": "L", "role": "Speaker", "text": "Thank you.", "zh": "谢谢。" }
+      ]
+    }
+  ]
+}

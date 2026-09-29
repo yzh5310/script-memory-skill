@@ -1,0 +1,162 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/yzh5310/script-memory-skill/schemas/script-data.schema.json",
+  "title": "Script memory data",
+  "description": "The single input that build_memory_html.py injects into template.html. Produced by the agent after reading the extracted script text. Dialogue text (k=L) must be byte-identical to the source script.",
+  "type": "object",
+  "required": ["title", "scenes"],
+  "additionalProperties": true,
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Work title as shown in the page header, e.g. \"Brave to Speak\"."
+    },
+    "subtitle": {
+      "type": "string",
+      "description": "Optional Chinese / secondary title, e.g. \"勇敢开麦\"."
+    },
+    "blurb": {
+      "type": "string",
+      "description": "Optional one-line summary under the header. Omit to let the page generate one from roles, beats and line count."
+    },
+    "roles": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Speaker labels exactly as they appear in the script, plus the ensemble label if any lines are spoken together, e.g. [\"A\",\"B\",\"A & B\"]. Omit to derive from the script."
+    },
+    "ensemble": {
+      "type": "string",
+      "description": "The label used for lines spoken together. Leave empty for monologues. Omit to derive (first role containing '&')."
+    },
+    "myRoles": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Roles to pre-select as the learner's own. Omit to default to the first single-speaker role, or to all roles when only one exists."
+    },
+    "beatUnit": {
+      "type": "string",
+      "default": "段",
+      "description": "Counter used for the skeleton cards: \"拍\" for stage beats, \"段\" for paragraphs of a speech."
+    },
+    "anchorWords": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 2,
+      "description": "How many leading words of a line are revealed as the recall anchor."
+    },
+    "cheatWords": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 3,
+      "description": "How many leading words of a line are written into the cue sheet."
+    },
+    "stateKey": {
+      "type": "string",
+      "description": "localStorage key for progress. Omit for an auto-generated one derived from the title."
+    },
+    "labels": {
+      "type": "object",
+      "description": "Display names for the inline cue codes.",
+      "properties": {
+        "S": { "type": "string", "default": "场景" },
+        "A": { "type": "string", "default": "动作" },
+        "T": { "type": "string", "default": "提示" }
+      }
+    },
+    "keyParts": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Repeated sentence patterns worth drilling as reusable parts, e.g. \"and you? ×2\". Shown in the help card and the copied instructions."
+    },
+    "rescueLines": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Three or so improvised lines the performer can fall back on if dry, e.g. the partner can be cued instead."
+    },
+    "cadence": {
+      "type": "string",
+      "description": "Optional replacement for the default four-day rehearsal cadence line."
+    },
+    "beatHint": {
+      "type": "string",
+      "description": "Optional replacement for the hint text under the skeleton cards."
+    },
+    "help": {
+      "type": "object",
+      "description": "Optional overrides for the in-page help card. Provide only what should differ from the defaults.",
+      "properties": {
+        "lead": {
+          "type": "array",
+          "description": "Rows at the top of the help card. A null second element marks where the memory-method block is injected.",
+          "items": { "type": "array" }
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 2,
+            "maxItems": 2
+          }
+        },
+        "cadence": { "type": ["string", "boolean"] }
+      }
+    },
+    "beats": {
+      "type": "array",
+      "description": "Skeleton cards: the few images the whole piece collapses into. Omit to derive from the k=B headings.",
+      "items": {
+        "type": "object",
+        "required": ["name", "title"],
+        "properties": {
+          "name": { "type": "string", "description": "Short counter label, e.g. \"拍 1\" or \"段 2\"." },
+          "title": { "type": "string", "description": "What happens, e.g. \"独白背小抄\"." },
+          "key": { "type": "string", "description": "Optional representative phrase from the beat." }
+        }
+      }
+    },
+    "scenes": {
+      "type": "array",
+      "minItems": 1,
+      "description": "The script, in order. Cue codes interleave with dialogue exactly as they occur.",
+      "items": {
+        "type": "object",
+        "required": ["name", "items"],
+        "properties": {
+          "name": { "type": "string", "description": "Scene or section heading, e.g. \"第 3 场 · 正文情景（The Scene）\"." },
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["k", "text"],
+              "properties": {
+                "k": {
+                  "enum": ["B", "S", "A", "T", "L"],
+                  "description": "B = beat heading, S = setting, A = action / blocking, T = delivery tip, L = dialogue line."
+                },
+                "role": {
+                  "type": "string",
+                  "description": "Required when k=L. One of roles, or the ensemble label."
+                },
+                "text": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "For k=L this is the dialogue and must be byte-identical to the source script."
+                },
+                "zh": {
+                  "type": "string",
+                  "description": "Optional meaning-level gloss shown to the learner. A gist, not a literal translation."
+                },
+                "key": {
+                  "type": "string",
+                  "description": "Only meaningful on k=B: representative phrase for the beat card."
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
